@@ -9,10 +9,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(bodyParser.json());
 
-mongoose.connect("mongodb://localhost:27017/appointments", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://vaidikthakkar5:sJuTIL6Dl6PC5d3F@cluster0.ct6q6.mongodb.net/appointments?retryWrites=true&w=majority&appName=Cluster0",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 const AppointmentSchema = new mongoose.Schema({
   name: String,
