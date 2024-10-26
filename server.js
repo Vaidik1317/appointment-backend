@@ -8,13 +8,15 @@ const PORT = process.env.PORT || 5000;
 
 // CORS options
 const corsOptions = {
-  origin: ["https://joyful-elf-684250.netlify.app"], // Replace with your actual Netlify domain
-  methods: ["GET", "POST", "PUT", "DELETE"], // Ensure necessary HTTP methods are allowed
+  origin: ["https://joyful-elf-684250.netlify.app", "http://localhost:3000"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
 };
-app.options("*", cors(corsOptions)); // Allow preflight across all routes
 
+// Enable CORS with specified options
 app.use(cors(corsOptions));
+
+// Allow JSON parsing
 app.use(bodyParser.json());
 
 // MongoDB connection
@@ -50,7 +52,7 @@ app.get("/api/appointments", (req, res) => {
     });
 });
 
-app.post("/api/appointment", (req, res) => {
+app.post("/api/appointments", (req, res) => {
   const newAppointment = new Appointment(req.body);
   newAppointment
     .save()
