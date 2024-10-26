@@ -26,6 +26,8 @@ mongoose
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 20000, // Increase timeout
+      socketTimeoutMS: 45000, // Increase socket timeout
     }
   )
   .then(() => console.log("MongoDB connected successfully"))
