@@ -8,11 +8,12 @@ const PORT = process.env.PORT || 5000;
 
 // CORS options
 const corsOptions = {
-  origin: ["https://joyful-elf-684250.netlify.app/"],
-  optionsSuccessStatus: 200, // For legacy browser support
+  origin: ["https://joyful-elf-684250.netlify.app"], // Replace with your actual Netlify domain
+  methods: ["GET", "POST", "PUT", "DELETE"], // Ensure necessary HTTP methods are allowed
+  optionsSuccessStatus: 200,
 };
+app.options("*", cors(corsOptions)); // Allow preflight across all routes
 
-// Middleware
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
