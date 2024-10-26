@@ -6,22 +6,29 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Change this to the specific origin of your frontend
-    credentials: true, // Allow cookies if needed
-  })
-);
+// CORS options
+const corsOptions = {
+  origin: ["https://joyful-elf-684250.netlify.app/"],
+  optionsSuccessStatus: 200, // For legacy browser support
+};
+
+// Middleware
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
-mongoose.connect(
-  "mongodb+srv://vaidikthakkar5:sJuTIL6Dl6PC5d3F@cluster0.ct6q6.mongodb.net/appointments?retryWrites=true&w=majority&appName=Cluster0",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+// MongoDB connection
+mongoose
+  .connect(
+    "mongodb+srv://root:12345@cluster0.ct6q6.mongodb.net/appointment?retryWrites=true&w=majority&appName=Cluster0",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("MongoDB connected successfully"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
+// Appointment Schema
 const AppointmentSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -29,12 +36,17 @@ const AppointmentSchema = new mongoose.Schema({
   status: { type: String, default: "pending" },
 });
 
+// Appointment Model
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
 
+// Routes
 app.get("/api/appointments", (req, res) => {
   Appointment.find()
     .then((appointments) => res.status(200).json(appointments))
-    .catch((err) => res.status(500).json({ error: err.message }));
+    .catch((err) => {
+      console.error("Error fetching appointments:", err);
+      res.status(500).json({ error: err.message });
+    });
 });
 
 app.post("/api/appointment", (req, res) => {
@@ -42,7 +54,10 @@ app.post("/api/appointment", (req, res) => {
   newAppointment
     .save()
     .then((savedAppointment) => res.status(201).json(savedAppointment))
-    .catch((err) => res.status(500).json({ error: err.message }));
+    .catch((err) => {
+      console.error("Error saving appointment:", err);
+      res.status(500).json({ error: err.message });
+    });
 });
 
 app.put("/api/appointments/accept/:id", (req, res) => {
@@ -58,9 +73,13 @@ app.put("/api/appointments/accept/:id", (req, res) => {
       }
       res.status(200).json(updatedAppointment);
     })
-    .catch((err) => res.status(500).json({ error: err.message }));
+    .catch((err) => {
+      console.error("Error updating appointment:", err);
+      res.status(500).json({ error: err.message });
+    });
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
