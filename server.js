@@ -3,15 +3,15 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); // For token-based authentication
-const Admin = require("./Admin");
+// const jwt = require("jsonwebtoken"); // For token-based authentication
+// const Admin = require("./Admin");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS options
 const corsOptions = {
-  origin: ["https://joyful-elf-684250.netlify.app", "http://localhost:3000"],
+  origin: ["https://saanvimakeover.netlify.app/", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
 };
@@ -49,7 +49,7 @@ mongoose
 // Appointment Schema
 const AppointmentSchema = new mongoose.Schema({
   name: String,
-  number: String,
+  number: Number,
   datetime: Date,
   status: { type: String, default: "pending" },
 });
@@ -78,25 +78,25 @@ app.post("/api/appointments", (req, res) => {
     });
 });
 
-app.post("/api/admin/login", async (req, res) => {
-  const { username, password } = req.body;
-  try {
-    const admin = await Admin.findOne({ username });
-    if (!admin) return res.status(404).json({ message: "Admin not found" });
+// app.post("/api/admin/login", async (req, res) => {
+//   const { username, password } = req.body;
+//   try {
+//     const admin = await Admin.findOne({ username });
+//     if (!admin) return res.status(404).json({ message: "Admin not found" });
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+//     const isMatch = await bcrypt.compare(password, admin.password);
+//     if (!isMatch)
+//       return res.status(400).json({ message: "Invalid credentials" });
 
-    // Generate a token (using JWT)
-    const token = jwt.sign({ id: admin._id }, "your_jwt_secret", {
-      expiresIn: "1h",
-    });
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
+//     // Generate a token (using JWT)
+//     const token = jwt.sign({ id: admin._id }, "your_jwt_secret", {
+//       expiresIn: "1h",
+//     });
+//     res.json({ token });
+//   } catch (error) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// });
 
 app.put("/api/appointments/accept/:id", (req, res) => {
   const appointmentId = req.params.id;
