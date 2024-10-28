@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 
 // CORS options
 const corsOptions = {
-  origin: ["https://saanvimakeover.netlify.app/", "http://localhost:3000"],
+  origin: ["https://saanvimakeover.netlify.app", "http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
 };
