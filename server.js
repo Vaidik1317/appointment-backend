@@ -49,7 +49,7 @@ mongoose
 // Appointment Schema
 const AppointmentSchema = new mongoose.Schema({
   name: String,
-  number: Number,
+  number: String,
   datetime: Date,
   status: { type: String, default: "pending" },
 });
