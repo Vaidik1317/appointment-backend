@@ -11,7 +11,11 @@ const PORT = process.env.PORT || 5000;
 
 // CORS options
 const corsOptions = {
-  origin: ["https://saanvimakeover.netlify.app", "http://localhost:3000", "https://saanvimakeover-admin.netlify.app"],
+  origin: [
+    "https://saanvimakeover.netlify.app",
+    "http://localhost:3000",
+    "https://saanvimakeover-admin.netlify.app",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
 };
@@ -50,6 +54,7 @@ mongoose
 const AppointmentSchema = new mongoose.Schema({
   name: String,
   number: Number,
+  selectedOption: String,
   datetime: Date,
   status: { type: String, default: "pending" },
 });
@@ -68,6 +73,7 @@ app.get("/api/appointments", (req, res) => {
 });
 
 app.post("/api/appointments", (req, res) => {
+  console.log("Received data:", req.body); // This should include selectedOption
   const newAppointment = new Appointment(req.body);
   newAppointment
     .save()
