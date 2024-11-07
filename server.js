@@ -2,51 +2,50 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-// const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken"); // For token-based authentication
-// const Admin = require("./Admin");
+const http = require("http"); // For creating the server with Socket.io
+const { Server } = require("socket.io"); // Importing Socket.io
 
 const app = express();
+const server = http.createServer(app); // Use http server to support Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: [
+      "https://saanvimakeover.netlify.app",
+      "http://localhost:3000",
+      "https://saanvimakeover-admin.netlify.app",
+      "http://saanvimakeover.in",
+      "https://saanvimakeover.in",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+}); // Initialize Socket.io with CORS settings
+
 const PORT = process.env.PORT || 5000;
 
-// CORS options
-const corsOptions = {
-  origin: [
-    "https://saanvimakeover.netlify.app",
-    "http://localhost:3000",
-    "https://saanvimakeover-admin.netlify.app",
-    "http://saanvimakeover.in",
-    "https://saanvimakeover.in",
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  optionsSuccessStatus: 200,
-};
-
 // Enable CORS with specified options
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-// Allow JSON parsing
+app.use(
+  cors({
+    origin: [
+      "https://saanvimakeover.netlify.app",
+      "http://localhost:3000",
+      "https://saanvimakeover-admin.netlify.app",
+      "http://saanvimakeover.in",
+      "https://saanvimakeover.in",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    optionsSuccessStatus: 200,
+  })
+);
+
 app.use(bodyParser.json());
 
 // MongoDB connection
-// mongoose
-//   .connect(
-//     "mongodb+srv://root:12345@cluster0.ct6q6.mongodb.net/appointment?retryWrites=true&w=majority&appName=Cluster0",
-//     {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//       serverSelectionTimeoutMS: 20000, // Increase timeout
-//       socketTimeoutMS: 45000, // Increase socket timeout
-//     }
-//   )
-//   .then(() => console.log("MongoDB connected successfully"))
-//   .catch((err) => console.error("MongoDB connection error:", err));
 mongoose
   .connect(
     "mongodb+srv://root:12345@cluster0.ct6q6.mongodb.net/appointment?retryWrites=true&w=majority&appName=Cluster0",
     {
-      serverSelectionTimeoutMS: 20000, // Increase timeout if needed
-      socketTimeoutMS: 45000, // Increase socket timeout if needed
+      serverSelectionTimeoutMS: 20000,
+      socketTimeoutMS: 45000,
     }
   )
   .then(() => console.log("MongoDB connected successfully"))
@@ -61,8 +60,15 @@ const AppointmentSchema = new mongoose.Schema({
   status: { type: String, default: "pending" },
 });
 
-// Appointment Model
 const Appointment = mongoose.model("Appointment", AppointmentSchema);
+
+// When a client connects to Socket.io
+io.on("connection", (socket) => {
+  console.log("Admin connected to WebSocket for real-time updates");
+  socket.on("disconnect", () => {
+    console.log("Admin disconnected");
+  });
+});
 
 // Routes
 app.get("/api/appointments", (req, res) => {
@@ -91,36 +97,20 @@ app.get("/api/appointments/:id", (req, res) => {
 });
 
 app.post("/api/appointments", (req, res) => {
-  console.log("Received data:", req.body); // This should include selectedOption
+  console.log("Received data:", req.body);
   const newAppointment = new Appointment(req.body);
   newAppointment
     .save()
-    .then((savedAppointment) => res.status(201).json(savedAppointment))
+    .then((savedAppointment) => {
+      res.status(201).json(savedAppointment);
+      // Emit the new appointment to connected clients (admin)
+      io.emit("newAppointment", savedAppointment);
+    })
     .catch((err) => {
       console.error("Error saving appointment:", err);
       res.status(500).json({ error: err.message });
     });
 });
-
-// app.post("/api/admin/login", async (req, res) => {
-//   const { username, password } = req.body;
-//   try {
-//     const admin = await Admin.findOne({ username });
-//     if (!admin) return res.status(404).json({ message: "Admin not found" });
-
-//     const isMatch = await bcrypt.compare(password, admin.password);
-//     if (!isMatch)
-//       return res.status(400).json({ message: "Invalid credentials" });
-
-//     // Generate a token (using JWT)
-//     const token = jwt.sign({ id: admin._id }, "your_jwt_secret", {
-//       expiresIn: "1h",
-//     });
-//     res.json({ token });
-//   } catch (error) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 
 app.put("/api/appointments/accept/:id", (req, res) => {
   const appointmentId = req.params.id;
@@ -141,7 +131,7 @@ app.put("/api/appointments/accept/:id", (req, res) => {
     });
 });
 
-// Start the server
-app.listen(PORT, () => {
+// Start the server with Socket.io
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
