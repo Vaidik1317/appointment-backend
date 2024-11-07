@@ -16,6 +16,7 @@ const corsOptions = {
     "http://localhost:3000",
     "https://saanvimakeover-admin.netlify.app",
     "http://saanvimakeover.in",
+    "https://saanvimakeover.in",
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   optionsSuccessStatus: 200,
