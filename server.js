@@ -24,7 +24,7 @@ const corsOptions = {
 
 // Enable CORS with specified options
 app.use(cors(corsOptions));
-
+app.options("*", cors(corsOptions));
 // Allow JSON parsing
 app.use(bodyParser.json());
 
@@ -70,6 +70,22 @@ app.get("/api/appointments", (req, res) => {
     .then((appointments) => res.status(200).json(appointments))
     .catch((err) => {
       console.error("Error fetching appointments:", err);
+      res.status(500).json({ error: err.message });
+    });
+});
+
+app.get("/api/appointments/:id", (req, res) => {
+  const appointmentId = req.params.id;
+
+  Appointment.findById(appointmentId)
+    .then((appointment) => {
+      if (!appointment) {
+        return res.status(404).json({ message: "Appointment not found" });
+      }
+      res.status(200).json(appointment);
+    })
+    .catch((err) => {
+      console.error("Error fetching appointment by ID:", err);
       res.status(500).json({ error: err.message });
     });
 });
